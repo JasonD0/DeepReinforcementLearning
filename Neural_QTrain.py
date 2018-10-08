@@ -15,7 +15,7 @@ TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
 GAMMA = 0.99 # discount factor
 INITIAL_EPSILON = 0.9 # starting value of epsilon
 FINAL_EPSILON = 0.1 # final value of epsilon
-EPSILON_DECAY_STEPS = 1000 # decay period
+EPSILON_DECAY_STEPS = 1000000 # decay period
 
 # Create environment
 # -- DO NOT MODIFY --
@@ -51,8 +51,8 @@ q_action = tf.reduce_sum(tf.multiply(q_values, action_in)) # action_in
 # TODO: Loss/Optimizer Definition
 #loss = tf.reduce_mean(-tf.reduce_sum(target_in * tf.log(q_action + 1e-2)), name="loss")
 loss = tf.reduce_mean(tf.squared_difference(target_in, q_action))
-optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001).minimize(loss)
-#optimizer = tf.train.AdamOptimizer().minimize(loss)
+#optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001).minimize(loss)
+optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
 
 # Start session - Tensorflow housekeeping
 session = tf.InteractiveSession()
