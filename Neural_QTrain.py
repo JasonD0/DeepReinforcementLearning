@@ -15,7 +15,7 @@ TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
 GAMMA = 0.99 # discount factor
 INITIAL_EPSILON = 0.9 # starting value of epsilon
 FINAL_EPSILON = 0.1 # final value of epsilon
-EPSILON_DECAY_STEPS = 1000000 # decay period
+EPSILON_DECAY_STEPS = 1000 # decay period
 
 # Create environment
 # -- DO NOT MODIFY --
