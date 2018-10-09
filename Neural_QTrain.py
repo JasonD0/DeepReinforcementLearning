@@ -13,7 +13,7 @@ TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
 
 # TODO: HyperParameters
 GAMMA = 0.99 # discount factor
-INITIAL_EPSILON = 0.9 # starting value of epsilon
+INITIAL_EPSILON = 0.6 # starting value of epsilon
 FINAL_EPSILON = 0.1 # final value of epsilon
 EPSILON_DECAY_STEPS = 1000 # decay period
 
@@ -33,20 +33,20 @@ target_in = tf.placeholder("float", [None])
 # TODO: Define Network Graph
 #w1 = tf.Variable(tf.random_normal([STATE_DIM, 10], stddev=0.05), dtype=tf.float32, name="weigthts1")  
 #b1 = tf.Variable(tf.zeros([10]), dtype=tf.float32, name="biases1")
-w1 = tf.get_variable(name="weights1", shape=[STATE_DIM, 32], dtype=tf.float32, initializer=tf.random_normal_initializer(0.01, 0.3))
+w1 = tf.get_variable(name="weights1", shape=[STATE_DIM, 32], dtype=tf.float32, initializer=tf.random_normal_initializer(0.01, 0.5))
 b1 = tf.get_variable(name="biases1", shape=[32], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
 
 #h1 = tf.nn.relu(tf.matmul(state_in, w1) + b1,  name="hidden1")
 h1 = tf.nn.relu(tf.matmul(state_in, w1) + b1)
 
-w2 = tf.get_variable(name="weights2", shape=[32, 16], dtype=tf.float32, initializer=tf.random_normal_initializer(0.01, 0.3))
+w2 = tf.get_variable(name="weights2", shape=[32, 16], dtype=tf.float32, initializer=tf.random_normal_initializer(0.01, 0.5))
 b2 = tf.get_variable(name="biases2", shape=[16], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
 
 h2 = tf.nn.relu(tf.matmul(h1, w2) + b2)
 
 #w2 = tf.Variable(tf.random_normal([10, 1], stddev=0.05), dtype=tf.float32, name="weights2")
 #b2 = tf.Variable(tf.zeros([1]), dtype=tf.float32, name="biases2")
-w3 = tf.get_variable(name="weights3", shape=[16, ACTION_DIM], dtype=tf.float32, initializer=tf.random_normal_initializer(0.01, 0.3))
+w3 = tf.get_variable(name="weights3", shape=[16, ACTION_DIM], dtype=tf.float32, initializer=tf.random_normal_initializer(0.01, 0.5))
 b3 = tf.get_variable(name="biases3", shape=[ACTION_DIM], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
 
 # TODO: Network outputs
