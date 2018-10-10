@@ -33,17 +33,17 @@ action_in = tf.placeholder("float", [None, ACTION_DIM])
 target_in = tf.placeholder("float", [None])
 
 # TODO: Define Network Graph
-w1 = tf.get_variable(name="weights1", shape=[STATE_DIM, 32], dtype=tf.float32, initializer=tf.random_normal_initializer(0., 0.3))
-b1 = tf.get_variable(name="biases1", shape=[32], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
+w1 = tf.get_variable(name="weights1", shape=[STATE_DIM, 64], dtype=tf.float32, initializer=tf.random_normal_initializer(0., 0.3))
+b1 = tf.get_variable(name="biases1", shape=[64], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
 
 h1 = tf.nn.relu(tf.matmul(state_in, w1) + b1)
 
-w2 = tf.get_variable(name="weights2", shape=[32, 16], dtype=tf.float32, initializer=tf.random_normal_initializer(0., 0.3))
-b2 = tf.get_variable(name="biases2", shape=[16], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
+w2 = tf.get_variable(name="weights2", shape=[64, 32], dtype=tf.float32, initializer=tf.random_normal_initializer(0., 0.3))
+b2 = tf.get_variable(name="biases2", shape=[32], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
 
 h2 = tf.nn.relu(tf.matmul(h1, w2) + b2)
 
-w3 = tf.get_variable(name="weights3", shape=[16, ACTION_DIM], dtype=tf.float32, initializer=tf.random_normal_initializer(0., 0.3))
+w3 = tf.get_variable(name="weights3", shape=[32, ACTION_DIM], dtype=tf.float32, initializer=tf.random_normal_initializer(0., 0.3))
 b3 = tf.get_variable(name="biases3", shape=[ACTION_DIM], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
 
 # TODO: Network outputs
