@@ -12,10 +12,12 @@ TEST = 10  # The number of tests to run every TEST_FREQUENCY episodes
 TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
 
 # TODO: HyperParameters
+MINI = 32
 GAMMA = 0.99 # discount factor
-INITIAL_EPSILON = 0.6 # starting value of epsilon
+INITIAL_EPSILON = 0.9 # starting value of epsilon
 FINAL_EPSILON = 0.1 # final value of epsilon
 EPSILON_DECAY_STEPS = 1000 # decay period
+experiences = []
 
 # Create environment
 # -- DO NOT MODIFY --
@@ -31,31 +33,25 @@ action_in = tf.placeholder("float", [None, ACTION_DIM])
 target_in = tf.placeholder("float", [None])
 
 # TODO: Define Network Graph
-#w1 = tf.Variable(tf.random_normal([STATE_DIM, 10], stddev=0.05), dtype=tf.float32, name="weigthts1")  
-#b1 = tf.Variable(tf.zeros([10]), dtype=tf.float32, name="biases1")
-w1 = tf.get_variable(name="weights1", shape=[STATE_DIM, 32], dtype=tf.float32, initializer=tf.random_normal_initializer(0.01, 0.5))
+w1 = tf.get_variable(name="weights1", shape=[STATE_DIM, 32], dtype=tf.float32, initializer=tf.random_normal_initializer(0., 0.3))
 b1 = tf.get_variable(name="biases1", shape=[32], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
 
-#h1 = tf.nn.relu(tf.matmul(state_in, w1) + b1,  name="hidden1")
 h1 = tf.nn.relu(tf.matmul(state_in, w1) + b1)
 
-w2 = tf.get_variable(name="weights2", shape=[32, 16], dtype=tf.float32, initializer=tf.random_normal_initializer(0.01, 0.5))
+w2 = tf.get_variable(name="weights2", shape=[32, 16], dtype=tf.float32, initializer=tf.random_normal_initializer(0., 0.3))
 b2 = tf.get_variable(name="biases2", shape=[16], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
 
 h2 = tf.nn.relu(tf.matmul(h1, w2) + b2)
 
-#w2 = tf.Variable(tf.random_normal([10, 1], stddev=0.05), dtype=tf.float32, name="weights2")
-#b2 = tf.Variable(tf.zeros([1]), dtype=tf.float32, name="biases2")
-w3 = tf.get_variable(name="weights3", shape=[16, ACTION_DIM], dtype=tf.float32, initializer=tf.random_normal_initializer(0.01, 0.5))
+w3 = tf.get_variable(name="weights3", shape=[16, ACTION_DIM], dtype=tf.float32, initializer=tf.random_normal_initializer(0., 0.3))
 b3 = tf.get_variable(name="biases3", shape=[ACTION_DIM], dtype=tf.float32, initializer=tf.constant_initializer(0.1))
 
 # TODO: Network outputs
 q_values = tf.matmul(h2, w3) + b3;
-q_action = tf.reduce_sum(tf.multiply(q_values, action_in)) # action_in 
+q_action = tf.reduce_sum(tf.multiply(q_values, action_in), reduction_indices=1) # action_in 
 
 # TODO: Loss/Optimizer Definition
-#loss = tf.reduce_mean(-tf.reduce_sum(target_in * tf.log(q_action + 1e-2)), name="loss")
-loss = tf.reduce_mean(tf.squared_difference(target_in, q_action))
+loss = tf.reduce_mean(tf.square(target_in - q_action))
 #optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001).minimize(loss)
 optimizer = tf.train.AdamOptimizer(0.001).minimize(loss)
 
@@ -82,6 +78,7 @@ def explore(state, epsilon):
     one_hot_action[action] = 1
     return one_hot_action
 
+
 # Main learning loop
 for episode in range(EPISODE):
 
@@ -90,27 +87,41 @@ for episode in range(EPISODE):
 
     # Update epsilon once per episode
     epsilon -= epsilon / EPSILON_DECAY_STEPS
-
+    if epsilon < FINAL_EPSILON:
+        epsilon = FINAL_EPSILON
+    
     # Move through env according to e-greedy policy
     for step in range(STEP):
         action = explore(state, epsilon)
         next_state, reward, done, _ = env.step(np.argmax(action))
 
-        nextstate_q_values = q_values.eval(feed_dict={
-            state_in: [next_state]
-        })
+        experiences.append([state, reward, action, next_state, done])
+        
+        if len(experiences) > MINI:
+            mini_batch = random.sample(experiences, MINI)
+            
+            states = [data[0] for data in mini_batch]
+            rewards = [data[1] for data in mini_batch]
+            actions = [data[2] for data in mini_batch]
+            next_states = [data[3] for data in mini_batch]
+            dones = [data[4] for data in mini_batch]
+            targets = []
 
-        # TODO: Calculate the target q-value.
-        # hint1: Bellman
-        # hint2: consider if the episode has terminated
-        target = reward + GAMMA*np.max(nextstate_q_values)*(1.0 - done) 
+            nextstate_q_values = q_values.eval(feed_dict={
+                state_in: next_states
+            })
 
-        # Do one training step
-        session.run([optimizer], feed_dict={
-            target_in: [target],
-            action_in: [action],
-            state_in: [state]
-        })
+            # TODO: Calculate the target q-value.
+            for i in range(len(mini_batch)):
+                target = rewards[i] + GAMMA*np.max(nextstate_q_values[i])*(1.0 - dones[i]) 
+                targets.append(target)
+
+            # Do one training step
+            session.run([optimizer], feed_dict={
+                target_in: targets,
+                action_in: actions,
+                state_in: states
+            })
 
         # Update
         state = next_state
